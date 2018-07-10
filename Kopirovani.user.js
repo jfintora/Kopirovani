@@ -19,12 +19,17 @@ function addOverviewItem(overviewUl, itemName, item) {
 
 (function() {
     'use strict';
+
+    if($('*[itemtype="http://schema.org/LocalBusiness"]').length == 0) {
+       return;
+    }
+
     var ulice = $('*[itemprop=streetAddress]').text();
     var outAddr = $('*[itemprop=address]').contents().filter(function() {
        return this.nodeType == 3;
     });
-    var cast = outAddr[0].nodeValue.trim();
-    var psc = outAddr[1].nodeValue.trim();
+    var cast = outAddr.first().text().trim();
+    var psc = outAddr.first().next().text().trim();
     var mesto = $('*[itemprop=addressLocality]').text();
     var adresa = [ulice, cast, psc].join(", ");
 
