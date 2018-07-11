@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kopirovani
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Kopirovani!
 // @author       You
 // @match        https://www.zivefirmy.cz/*
