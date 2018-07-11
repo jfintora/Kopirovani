@@ -6,7 +6,6 @@
 // @author       You
 // @match        https://www.zivefirmy.cz/*
 // @grant        none
-// @require      http://code.jquery.com/jquery.min.js
 // ==/UserScript==
 
 function wrap(text) {
@@ -39,9 +38,10 @@ function addOverviewItem(overviewUl, itemName, item) {
     var firma = $('.header *[itemprop=name]').first().text();
     var kontaktniOsoba = $('*[itemprop=employees] *[itemprop=name]').first().text();
     var tel = $('.spojeni *[itemprop=telephone]').first().text();
+    var pocetZamestnancu = $('#pocet_zamestnancu').text().replace("Počet zaměstnanců: ", "");
     var empty = "";
 
-    var lineArray = [empty, ico, firma, kontaktniOsoba, tel, empty, mesto, empty, empty, empty, empty, empty, empty, adresa];
+    var lineArray = [empty, ico, firma, kontaktniOsoba, tel, empty, mesto, empty, pocetZamestnancu, empty, empty, empty, empty, adresa];
 
     for(var i = 0; i < lineArray.length; i++) {
         lineArray[i] = wrap(lineArray[i])
@@ -65,6 +65,7 @@ function addOverviewItem(overviewUl, itemName, item) {
     addOverviewItem(overviewUl, "Kontaktní Osoba", kontaktniOsoba);
     addOverviewItem(overviewUl, "Telefon", tel);
     addOverviewItem(overviewUl, "Město", mesto);
+    addOverviewItem(overviewUl, "Počet zaměstnanců", pocetZamestnancu);
     addOverviewItem(overviewUl, "Adresa", adresa);
 
 })();
