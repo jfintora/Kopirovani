@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kopirovani
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Kopirovani!
 // @author       You
 // @match        https://www.zivefirmy.cz/*
@@ -16,6 +16,16 @@ function addOverviewItem(overviewUl, itemName, item) {
     overviewUl.append('<tr><td style="font-weight:bold;">'+itemName + ':</td><td>' + item +'</td></tr>');
 }
 
+function createDropDown(name, items, selectedIndex) {
+    var dropDown = '<select name="'+name+'">"';
+    for(var i = 0; i < items.length; i++) {
+        var selected = i == selectedIndex ? 'selected' : '';
+        dropDown += '<option value="'+items[i]+'" '+selected+'>'+items[i]+'</option>';
+    }
+    dropDown += "</select>"
+    return dropDown;
+}
+
 (function() {
     'use strict';
 
@@ -27,28 +37,26 @@ function addOverviewItem(overviewUl, itemName, item) {
     var outAddr = $('*[itemprop=address]').contents().filter(function() {
        return this.nodeType == 3;
     });
-    var cast = outAddr.first().text().trim();
-    var psc = outAddr.first().next().text().trim();
+    var cast1 = outAddr.first().text().trim();
+    var cast2 = outAddr.first().next().text().trim();
     var mesto = $('*[itemprop=addressLocality]').text();
-    var adresa = [ulice, cast, psc].join(", ");
+    var psc = $('*[itemprop=postalCode]').text();
+    var adresa = [ulice, cast1, cast2, psc].join(", ");
 
     var icoTxt = $('body').find("div:contains('IČ: ')").last().contents().first().text();
     var ico = icoTxt.replace("IČ: ", "");
 
     var firma = $('.header *[itemprop=name]').first().text();
-    var kontaktniOsoba = $('*[itemprop=employees] *[itemprop=name]').first().text();
-    var tel = $('.spojeni *[itemprop=telephone]').first().text();
+    var kontaktniOsoby = []
+    $('*[itemprop=employees] *[itemprop=name]').each(function() {
+        kontaktniOsoby.push($(this).text());
+    });
+    var tels = [];
+    $('.spojeni *[itemprop=telephone]').each(function() {
+        tels.push($(this).text());
+    });
     var pocetZamestnancu = $('#pocet_zamestnancu').text().replace("Počet zaměstnanců: ", "");
     var empty = "";
-
-    var lineArray = [empty, ico, firma, kontaktniOsoba, tel, empty, mesto, empty, pocetZamestnancu, empty, empty, empty, empty, adresa];
-
-    for(var i = 0; i < lineArray.length; i++) {
-        lineArray[i] = wrap(lineArray[i])
-    }
-
-    var line = lineArray.join(";");
-    navigator.clipboard.writeText(line);
 
     $('body').append('<div id="temper_overview"><table><legend><strong>Zkopírováno</strong></legend></table></div>');
     var overview = $('#temper_overview');
@@ -62,10 +70,29 @@ function addOverviewItem(overviewUl, itemName, item) {
     var overviewUl = overview.find("table");
     addOverviewItem(overviewUl, "IČ", ico);
     addOverviewItem(overviewUl, "Název", firma);
-    addOverviewItem(overviewUl, "Kontaktní Osoba", kontaktniOsoba);
-    addOverviewItem(overviewUl, "Telefon", tel);
+    addOverviewItem(overviewUl, "Kontaktní Osoba", createDropDown("osoba", kontaktniOsoby, 0));
+    addOverviewItem(overviewUl, "Telefon", createDropDown("tel1", tels, 0));
+    addOverviewItem(overviewUl, "Telefon2", createDropDown("tel2", tels, 1));
     addOverviewItem(overviewUl, "Město", mesto);
     addOverviewItem(overviewUl, "Počet zaměstnanců", pocetZamestnancu);
     addOverviewItem(overviewUl, "Adresa", adresa);
 
+    function copyToClipboard() {
+        var osoba = $("#temper_overview select[name=osoba]").val();
+        var tel1 = $("#temper_overview select[name=tel1]").val();
+        var tel2 = $("#temper_overview select[name=tel2]").val();
+
+        var lineArray = [empty, ico, firma, osoba, tel1, tel2, mesto, empty, pocetZamestnancu, adresa, psc];
+
+        for(var i = 0; i < lineArray.length; i++) {
+            lineArray[i] = wrap(lineArray[i])
+        }
+
+        var line = lineArray.join(";");
+        navigator.clipboard.writeText(line);
+    };
+
+    $("#temper_overview select").on("change", copyToClipboard);
+    copyToClipboard();
 })();
+
