@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kopirovani
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Kopirovani!
 // @author       You
 // @match        https://www.zivefirmy.cz/*
@@ -18,8 +18,11 @@ function addOverviewItem(overviewUl, itemName, item) {
 
 function createDropDown(name, items, selectedIndex) {
     var dropDown = '<select name="'+name+'">"';
+    var selected = items.length == 0 || items.length <= selectedIndex ? 'selected' : '';
+    dropDown += '<option value="" '+selected+'>-- Nevybráno --</option>';
+
     for(var i = 0; i < items.length; i++) {
-        var selected = i == selectedIndex ? 'selected' : '';
+        selected = i == selectedIndex ? 'selected' : '';
         dropDown += '<option value="'+items[i]+'" '+selected+'>'+items[i]+'</option>';
     }
     dropDown += "</select>"
